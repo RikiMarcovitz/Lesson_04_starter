@@ -20,3 +20,16 @@ def test_valid_selection_is_recorded_on_the_event(sample_event):
 @pytest.mark.req("REQ-SEL-03")
 def test_available_services_lists_enabled_services_only(sample_event):
     assert selection_core.available_services(sample_event) == ["add_to_album"]
+
+@pytest.mark.req("REQ-SEL-0?")
+def test_media_not_in_event_is_rejected(sample_event):
+    with pytest.raises(selection_core.SelectionError) as exc:
+        selection_core.submit_selection(sample_event, "cli_100", ["med_9"], ["add_to_album"])
+    assert exc.value.code == "MEDIA_NOT_IN_EVENT"
+
+
+@pytest.mark.req("REQ-SEL-0?")
+def test_rejected_selection_leaves_event_unchanged(sample_event):
+    with pytest.raises(selection_core.SelectionError):
+        selection_core.submit_selection(sample_event, "cli_100", ["med_9"], ["add_to_album"])
+    assert sample_event["selections"] == []
